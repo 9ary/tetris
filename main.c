@@ -26,8 +26,9 @@ void draw_piece(int piece, int orientation, int x, int y)
     for (j = 0; j < 4; j++)
     for (i = 0; i < 4; i++)
     {
-        tile = pieces[piece][orientation][i + j *4];
-        drawSprite(color[tile], (x + i) * 11 + 105, (y + j) * 11 + 10);
+        tile = pieces[piece][orientation][i + j * 4];
+        if (tile > 0)
+            drawSprite(color[tile], (x + i) * 11 + 105, (y + j) * 11 + 10);
     }
 }
 
@@ -43,11 +44,6 @@ int main(void)
 
     while (isKeyPressed(KEY_NSPIRE_ESC) == 0)
     {
-       //drawing ops
-       clearBufferB(); // need to update this afterward to only erase the tile
-                       // being drawn and if applicable the top blocks when they
-                       // drop down; we could use a black tile for  this.
-
        draw_tilemap(map);
        draw_piece(rand() % 7, rand() % 4, 3, 10);
        updateScreen();
