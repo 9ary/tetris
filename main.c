@@ -52,8 +52,14 @@ int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
-		if (tile > 0 && map[(x + i) + (y + j) * 10])
-			return 1;
+		if (tile > 0)
+		{
+			if (map[(x + i) + (y + j) * 10])
+				return 1;
+
+			if ((x + i) < 0 || (x + i) >= 10 || (y + j) >= 20)
+				return 1;
+		}
 	}
 	return 0;
 }
