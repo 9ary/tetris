@@ -18,10 +18,9 @@ void draw_tilemap(const uint8_t map[])
 	}
 }
 
-void draw_piece(int piece, int orientation, int x, int y)
+void piece_draw(int piece, int orientation, int x, int y)
 {
-	int i;
-	int j;
+	int i, j;
 	uint8_t tile;
 	for (j = 0; j < 4; j++)
 	for (i = 0; i < 4; i++)
@@ -32,12 +31,41 @@ void draw_piece(int piece, int orientation, int x, int y)
 	}
 }
 
+void piece_merge(int piece, int orientation, int x, int y, uint8_t map[])
+{
+	int i, j;
+	uint8_t tile;
+	for (j = 0; j < 4; j++)
+	for (i = 0; i < 4; i++)
+	{
+		tile = pieces[piece][orientation][i + j * 4];
+		if (tile > 0)
+			map[(x + i) + (y + j) * 10] = tile;
+	}
+}
+
+int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
+{
+	int i, j;
+	uint8_t tile;
+	for (j = 0; j < 4; j++)
+	for (i = 0; i < 4; i++)
+	{
+		tile = pieces[piece][orientation][i + j * 4];
+		if (tile > 0 && map[(x + i) + (y + j) * 10])
+			return 1;
+	}
+	return 0;
+}
+
 int main(void)
 {
 	srand(time(NULL));
 	int i;
 	uint8_t map[200];
 	for (i = 0; i < 200; i++) map[i] = 0;
+	piece_merge(4, 7, 0, 0, map);
+	if (! piece_collide(4, 7, 2, 0, map)) piece_merge(4, 7, 2, 0, map);
 
 	int block_x,block_y, rot, score;
 	initBuffering();
@@ -46,7 +74,7 @@ int main(void)
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
 		draw_tilemap(map);
-		draw_piece(rand() % 7, rand() % 4, 3, 10);
+		piece_draw(rand() % 7, rand() % 4, 3, 10);
 		updateScreen();
 	}
 	deinitBuffering();
