@@ -1,9 +1,9 @@
 #include <os.h>
 #include <stdlib.h>
 #include <time.h>
+#include "n2DLib.h"
 #include "pieces.h"
 #include "sprites.h"
-#include "n2DLib.h"
 
 #define GRID_W 10
 #define GRID_H 20
@@ -13,9 +13,9 @@
 
 void draw_tilemap(const uint8_t map[])
 {
-	int x;
-	int y;
+	int x, y;
 	uint8_t tile;
+
 	for (y = 0; y < GRID_H; y++)
 	for (x = 0; x < GRID_W; x++)
 	{
@@ -28,6 +28,7 @@ void piece_draw(int piece, int orientation, int x, int y)
 {
 	int i, j;
 	uint8_t tile;
+
 	for (j = 0; j < 4; j++)
 	for (i = 0; i < 4; i++)
 	{
@@ -41,6 +42,7 @@ void piece_merge(int piece, int orientation, int x, int y, uint8_t map[])
 {
 	int i, j;
 	uint8_t tile;
+
 	for (j = 3; j >= 0; j--)
 	for (i = 0; i < 4; i++)
 	{
@@ -54,6 +56,7 @@ int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
 {
 	int i, j;
 	uint8_t tile;
+
 	for (j = 0; j < 4; j++)
 	for (i = 0; i < 4; i++)
 	{
@@ -72,14 +75,15 @@ int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
 
 int main(void)
 {
-	srand(time(NULL));
-	int i;
-	int x = 4, y = 2;
-	int cur_piece = 0;
-	int rot = 0;
-	uint8_t map[GRID_H * GRID_W];
+	srand(time(NULL)); // RNG seed
+	int i; // Loop index
 
-	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; //map init
+	int x = 4, y = 0;
+	int cur_piece = 0, rot = 0;
+
+	uint8_t map[GRID_H * GRID_W];
+	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; // Map init
+
 	initBuffering();
 	clearBufferW();
 
@@ -90,16 +94,21 @@ int main(void)
 			draw_tilemap(map);
 			if(isKeyPressed(KEY_NSPIRE_UP) && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
 				rot = (rot + 1) % 4;
+
 			if(isKeyPressed(KEY_NSPIRE_RIGHT) && ! piece_collide(cur_piece, rot, x + 1, y, map))
 				x++;
+
 			if(isKeyPressed(KEY_NSPIRE_LEFT) && ! piece_collide(cur_piece, rot, x - 1, y, map))
 				x--;
+
 			if(isKeyPressed(KEY_NSPIRE_PLUS))
 				cur_piece = (cur_piece + 1) % 7;
+
 			piece_draw(cur_piece, rot, x, y);
 			updateScreen();
 			sleep(50);
 		}
+
 		if(! piece_collide(cur_piece, rot, x, y + 1, map))
 		{
 			y++;
