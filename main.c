@@ -10,6 +10,7 @@
 #define GRID_X 10
 #define GRID_Y 105
 
+
 void draw_tilemap(const uint8_t map[])
 {
 	int x;
@@ -73,21 +74,46 @@ int main(void)
 {
 	srand(time(NULL));
 	int i;
+	int x = 4, y = 2;
+	int cur_piece = 0;
+	int rot = 0;
 	uint8_t map[GRID_H * GRID_W];
-	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0;
-	piece_merge(4, 7, 0, 0, map);
-	if (! piece_collide(4, 7, 2, 0, map)) piece_merge(4, 7, 2, 0, map);
 
-	//int block_x,block_y, rot, score;
+	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; //map init
 	initBuffering();
 	clearBufferW();
 
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
-		draw_tilemap(map);
-		piece_draw(rand() % 7, rand() % 4, 3, 10);
-		updateScreen();
+		for(i = 0; i < 8; i++)
+		{
+			draw_tilemap(map);
+			if(isKeyPressed(KEY_NSPIRE_UP) && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
+				rot = (rot + 1) % 4;
+			if(isKeyPressed(KEY_NSPIRE_RIGHT) && ! piece_collide(cur_piece, rot, x + 1, y, map))
+				x++;
+			if(isKeyPressed(KEY_NSPIRE_LEFT) && ! piece_collide(cur_piece, rot, x - 1, y, map))
+				x--;
+			if(isKeyPressed(KEY_NSPIRE_PLUS))
+				cur_piece = (cur_piece + 1) % 7;
+			piece_draw(cur_piece, rot, x, y);
+			updateScreen();
+			sleep(50);
+		}
+		if(! piece_collide(cur_piece, rot, x, y + 1, map))
+		{
+			y++;
+		}
+		else
+		{
+			piece_merge(cur_piece, rot, x, y, map);
+			y = 0;
+			x = 4;
+			rot = 0;
+			cur_piece = rand() % 7;
+		}
 	}
+
 	deinitBuffering();
 	return 0;
 }
