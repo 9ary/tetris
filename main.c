@@ -121,6 +121,9 @@ int main(void)
 			if(key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
 				x--;
 
+			if (key_down() && ! piece_collide(cur_piece, rot, x, y + 1, map))
+				y++;
+
 			if(isKeyPressed(KEY_NSPIRE_PLUS))
 				cur_piece = (cur_piece + 1) % 7;
 
