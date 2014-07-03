@@ -112,7 +112,7 @@ int main(void)
 		for (i = 0; i < 8; i++)
 		{
 			draw_tilemap(map);
-			f(key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
+			if(key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
 				rot = (rot + 1) % 4;
 
 			if (key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
