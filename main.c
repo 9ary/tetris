@@ -129,7 +129,7 @@ int main(void)
 
 			piece_draw(cur_piece, rot, x, y);
 			updateScreen();
-			sleep(50);
+			sleep(200);
 		}
 
 		if (! piece_collide(cur_piece, rot, x, y + 1, map))
