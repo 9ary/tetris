@@ -152,8 +152,6 @@ int main(void)
 			{
 				if (map[j + i * GRID_W] > 0)
 					k++;
-				else
-					break;
 			}
 			if (k == GRID_W)
 			{
