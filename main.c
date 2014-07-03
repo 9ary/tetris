@@ -76,7 +76,7 @@ int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
 int main(void)
 {
 	srand(time(NULL)); // RNG seed
-	int i; // Loop index
+	int i, j; // Loop index
 
 	int x = 4, y = 0;
 	int cur_piece = 0, rot = 0;
@@ -120,6 +120,32 @@ int main(void)
 			x = 4;
 			rot = 0;
 			cur_piece = rand() % 7;
+		}
+
+		for (i = GRID_H - 1; i >= 0; i--)
+		{
+			int k = 0;
+			for (j = 0; j < GRID_W; j++)
+			{
+				if (map[j + i * GRID_W] > 0)
+					k++;
+				else
+					break;
+			}
+			if (k == GRID_W)
+			{
+				for (j = 0; j < GRID_W; j++)
+					map[j + i * GRID_W] = 0;
+
+				for (j = i; j > 0; j--)
+				for (k = 0; k < GRID_W; k++)
+					map[k + j * GRID_W] = map[k + (j - 1) * GRID_W];
+
+				for (j = 0; j < GRID_W; j++)
+					map[j] = 0;
+
+				i++;
+			}
 		}
 	}
 
