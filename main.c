@@ -109,22 +109,22 @@ int main(void)
 
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
-		for(i = 0; i < 8; i++)
+		for (i = 0; i < 8; i++)
 		{
 			draw_tilemap(map);
-			if(key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
+			f(key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
 				rot = (rot + 1) % 4;
 
-			if(key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
+			if (key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
 				x++;
 
-			if(key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
+			if (key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
 				x--;
 
 			if (key_down() && ! piece_collide(cur_piece, rot, x, y + 1, map))
 				y++;
 
-			if(isKeyPressed(KEY_NSPIRE_PLUS))
+			if (isKeyPressed(KEY_NSPIRE_PLUS))
 				cur_piece = (cur_piece + 1) % 7;
 
 			piece_draw(cur_piece, rot, x, y);
@@ -132,7 +132,7 @@ int main(void)
 			sleep(50);
 		}
 
-		if(! piece_collide(cur_piece, rot, x, y + 1, map))
+		if (! piece_collide(cur_piece, rot, x, y + 1, map))
 		{
 			y++;
 		}
