@@ -73,6 +73,26 @@ int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
 	return 0;
 }
 
+int key_left()
+{
+	return isKeyPressed(KEY_NSPIRE_LEFT) || isKeyPressed(KEY_NSPIRE_4);
+}
+
+int key_right()
+{
+	return isKeyPressed(KEY_NSPIRE_RIGHT) || isKeyPressed(KEY_NSPIRE_6);
+}
+
+int key_up()
+{
+	return isKeyPressed(KEY_NSPIRE_UP) || isKeyPressed(KEY_NSPIRE_8);
+}
+
+int key_down()
+{
+	return isKeyPressed(KEY_NSPIRE_DOWN) || isKeyPressed(KEY_NSPIRE_5) || isKeyPressed(KEY_NSPIRE_2);
+}
+
 int main(void)
 {
 	srand(time(NULL)); // RNG seed
@@ -92,13 +112,13 @@ int main(void)
 		for(i = 0; i < 8; i++)
 		{
 			draw_tilemap(map);
-			if(isKeyPressed(KEY_NSPIRE_UP) && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
+			if(key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
 				rot = (rot + 1) % 4;
 
-			if(isKeyPressed(KEY_NSPIRE_RIGHT) && ! piece_collide(cur_piece, rot, x + 1, y, map))
+			if(key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
 				x++;
 
-			if(isKeyPressed(KEY_NSPIRE_LEFT) && ! piece_collide(cur_piece, rot, x - 1, y, map))
+			if(key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
 				x--;
 
 			if(isKeyPressed(KEY_NSPIRE_PLUS))
