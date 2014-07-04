@@ -10,6 +10,9 @@
 #define GRID_X 10
 #define GRID_Y 105
 
+#define TIMER 0x900D0000
+volatile unsigned *timer_ctl, *timer_value, *timer_load;
+unsigned timer_ctl_bkp, timer_load_bkp;
 
 void draw_tilemap(const uint8_t map[])
 {
@@ -95,6 +98,23 @@ int key_down()
 
 int main(void)
 {
+	// Timer
+	timer_ctl = (unsigned *) (TIMER + 0x08);
+	if (is_cx)
+	{
+		timer_value = (unsigned *) (TIMER + 0x04);
+		timer_load = (unsigned *) (TIMER + 0x00);
+		timer_ctl_bkp = *timer_ctl;
+		timer_load_bkp = *timer_load;
+
+		*timer_ctl &= ~(1 << 7);
+		*timer_ctl = 0b01100011;
+		*timer_ctl |= (1 << 7);
+	}
+	else
+	{
+	}
+
 	srand(time(NULL)); // RNG seed
 	int i, j; // Loop index
 
@@ -109,10 +129,11 @@ int main(void)
 
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
-		for (i = 0; i < 8; i++)
+		*timer_load = 32768;
+		while (*timer_value > 0)
 		{
 			draw_tilemap(map);
-			if(key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
+			if (key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
 				rot = (rot + 1) % 4;
 
 			if (key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
@@ -129,7 +150,6 @@ int main(void)
 
 			piece_draw(cur_piece, rot, x, y);
 			updateScreen();
-			sleep(200);
 		}
 
 		if (! piece_collide(cur_piece, rot, x, y + 1, map))
@@ -170,6 +190,16 @@ int main(void)
 		}
 	}
 
+	if (is_cx)
+	{
+		*timer_ctl &= ~(1 << 7);
+		*timer_ctl = timer_ctl_bkp & ~(1 << 7);
+		*timer_load = timer_load_bkp;
+		*timer_ctl = timer_ctl_bkp;
+	}
+	else
+	{
+	}
 	deinitBuffering();
 	return 0;
 }
