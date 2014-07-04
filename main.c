@@ -163,29 +163,29 @@ int main(void)
 			x = 4;
 			rot = 0;
 			cur_piece = rand() % 7;
-		}
 
-		for (i = GRID_H - 1; i >= 0; i--)
-		{
-			int k = 0;
-			for (j = 0; j < GRID_W; j++)
+			for (i = GRID_H - 1; i >= 0; i--)
 			{
-				if (map[j + i * GRID_W] > 0)
-					k++;
-			}
-			if (k == GRID_W)
-			{
+				int k = 0;
 				for (j = 0; j < GRID_W; j++)
-					map[j + i * GRID_W] = 0;
+				{
+					if (map[j + i * GRID_W] > 0)
+						k++;
+				}
+				if (k == GRID_W)
+				{
+					for (j = 0; j < GRID_W; j++)
+						map[j + i * GRID_W] = 0;
 
-				for (j = i; j > 0; j--)
-				for (k = 0; k < GRID_W; k++)
-					map[k + j * GRID_W] = map[k + (j - 1) * GRID_W];
+					for (j = i; j > 0; j--)
+					for (k = 0; k < GRID_W; k++)
+						map[k + j * GRID_W] = map[k + (j - 1) * GRID_W];
 
-				for (j = 0; j < GRID_W; j++)
-					map[j] = 0;
+					for (j = 0; j < GRID_W; j++)
+						map[j] = 0;
 
-				i++;
+					i++;
+				}
 			}
 		}
 	}
