@@ -99,11 +99,11 @@ int key_down()
 int main(void)
 {
 	// Timer
-	timer_ctl = (unsigned *) (TIMER + 0x08);
+	timer_ctl = (unsigned *) (TIMER + 0x28);
 	if (is_cx)
 	{
-		timer_value = (unsigned *) (TIMER + 0x04);
-		timer_load = (unsigned *) (TIMER + 0x00);
+		timer_value = (unsigned *) (TIMER + 0x24);
+		timer_load = (unsigned *) (TIMER + 0x20);
 		timer_ctl_bkp = *timer_ctl;
 		timer_load_bkp = *timer_load;
 
