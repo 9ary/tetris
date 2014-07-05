@@ -127,7 +127,7 @@ int main(void)
 	initBuffering();
 	clearBufferW();
 
-	*timer_load = 32768 * 5;
+	*timer_load = 32768;
 
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
@@ -151,40 +151,43 @@ int main(void)
 		piece_draw(cur_piece, rot, x, y);
 		updateScreen();
 
-		if ((! piece_collide(cur_piece, rot, x, y + 1, map)) && *timer_value != 0)
+		if (*timer_value == 0)
 		{
-			*timer_load = 32768 * 5;
-			y++;
-		}
-		else
-		{
-			piece_merge(cur_piece, rot, x, y, map);
-			y = 0;
-			x = 4;
-			rot = 0;
-			cur_piece = rand() % 7;
-
-			for (i = GRID_H - 1; i >= 0; i--)
+			if (! piece_collide(cur_piece, rot, x, y + 1, map))
 			{
-				int k = 0;
-				for (j = 0; j < GRID_W; j++)
+				*timer_load = 32768;
+				y++;
+			}
+			else
+			{
+				piece_merge(cur_piece, rot, x, y, map);
+				y = 0;
+				x = 4;
+				rot = 0;
+				cur_piece = rand() % 7;
+
+				for (i = GRID_H - 1; i >= 0; i--)
 				{
-					if (map[j + i * GRID_W] > 0)
-						k++;
-				}
-				if (k == GRID_W)
-				{
+					int k = 0;
 					for (j = 0; j < GRID_W; j++)
-						map[j + i * GRID_W] = 0;
+					{
+						if (map[j + i * GRID_W] > 0)
+							k++;
+					}
+					if (k == GRID_W)
+					{
+						for (j = 0; j < GRID_W; j++)
+							map[j + i * GRID_W] = 0;
 
-					for (j = i; j > 0; j--)
-					for (k = 0; k < GRID_W; k++)
-						map[k + j * GRID_W] = map[k + (j - 1) * GRID_W];
+						for (j = i; j > 0; j--)
+						for (k = 0; k < GRID_W; k++)
+							map[k + j * GRID_W] = map[k + (j - 1) * GRID_W];
 
-					for (j = 0; j < GRID_W; j++)
-						map[j] = 0;
+						for (j = 0; j < GRID_W; j++)
+							map[j] = 0;
 
-					i++;
+						i++;
+					}
 				}
 			}
 		}
