@@ -120,6 +120,7 @@ int main(void)
 
 	int x = 4, y = 0;
 	int cur_piece = 0, rot = 0;
+	unsigned speed = 16384;
 
 	uint8_t map[GRID_H * GRID_W];
 	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; // Map init
@@ -127,7 +128,7 @@ int main(void)
 	initBuffering();
 	clearBufferW();
 
-	*timer_load = 32768;
+	*timer_load = speed;
 
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
@@ -155,7 +156,7 @@ int main(void)
 		{
 			if (! piece_collide(cur_piece, rot, x, y + 1, map))
 			{
-				*timer_load = 32768;
+				*timer_load = speed;
 				y++;
 			}
 			else
