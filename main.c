@@ -36,7 +36,7 @@ void piece_draw(int piece, int orientation, int x, int y)
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
-		if (tile > 0)
+		if (tile > 0 && (x + i) >= 0)
 			drawSprite(color[tile], (x + i) * 11 + GRID_Y, (y + j) * 11 + GRID_X);
 	}
 }
@@ -50,7 +50,7 @@ void piece_merge(int piece, int orientation, int x, int y, uint8_t map[])
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
-		if (tile > 0)
+		if (tile > 0 && (x + i) >= 0)
 			map[(x + i) + (y + j) * GRID_W] = tile;
 	}
 }
@@ -118,8 +118,8 @@ int main(void)
 	srand(time(NULL)); // RNG seed
 	int i, j; // Loop index
 
-	int x = 4, y = 0;
-	int cur_piece = 0, rot = 0;
+	int x = 3, y = -2;
+	int cur_piece = rand() % 7, rot = 0;
 	unsigned speed = 16384;
 
 	uint8_t map[GRID_H * GRID_W];
@@ -162,8 +162,7 @@ int main(void)
 			else
 			{
 				piece_merge(cur_piece, rot, x, y, map);
-				y = 0;
-				x = 4;
+				x = 3; y = -2;
 				rot = 0;
 				cur_piece = rand() % 7;
 
