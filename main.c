@@ -11,8 +11,68 @@
 #define GRID_Y 105
 
 #define TIMER 0x900D0000
-volatile unsigned *timer_ctl, *timer_value, *timer_load;
-unsigned timer_ctl_bkp, timer_load_bkp;
+unsigned timer_ctl_bkp[2], timer_load_bkp[2];
+
+void timer_init(int timer)
+{
+	if (is_cx)
+	{
+		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x20 * timer);
+		volatile unsigned *timer_load = (unsigned *) (TIMER + 0x20 * timer);
+
+		timer_ctl_bkp[timer] = *timer_ctl;
+		timer_load_bkp[timer] = *timer_load;
+
+		*timer_ctl &= ~(1 << 7);
+		*timer_ctl = 0b01100011;
+		*timer_ctl |= (1 << 7);
+	}
+	else
+	{
+	}
+}
+
+void timer_restore(int timer)
+{
+	if (is_cx)
+	{
+		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x20 * timer);
+		volatile unsigned *timer_load = (unsigned *) (TIMER + 0x20 * timer);
+
+		*timer_ctl &= ~(1 << 7);
+		*timer_ctl = timer_ctl_bkp[timer] & ~(1 << 7);
+		*timer_load = timer_load_bkp[timer];
+		*timer_ctl = timer_ctl_bkp[timer];
+	}
+	else
+	{
+	}
+}
+
+void timer_load(int timer, unsigned value)
+{
+	if (is_cx)
+	{
+		volatile unsigned *timer_load = (unsigned *) (TIMER + 0x20 * timer);
+		*timer_load = value;
+	}
+	else
+	{
+	}
+}
+
+unsigned timer_read(int timer)
+{
+	if (is_cx)
+	{
+		volatile unsigned *timer_value = (unsigned *) (TIMER + 0x04 + 0x20 * timer);
+		return *timer_value;
+	}
+	else
+	{
+		return 0; // Dummy
+	}
+}
 
 void draw_tilemap(const uint8_t map[])
 {
@@ -98,22 +158,7 @@ int key_down()
 
 int main(void)
 {
-	// Timer
-	timer_ctl = (unsigned *) (TIMER + 0x28);
-	if (is_cx)
-	{
-		timer_value = (unsigned *) (TIMER + 0x24);
-		timer_load = (unsigned *) (TIMER + 0x20);
-		timer_ctl_bkp = *timer_ctl;
-		timer_load_bkp = *timer_load;
-
-		*timer_ctl &= ~(1 << 7);
-		*timer_ctl = 0b01100011;
-		*timer_ctl |= (1 << 7);
-	}
-	else
-	{
-	}
+	timer_init(1);
 
 	srand(time(NULL)); // RNG seed
 	int i, j; // Loop index
@@ -128,7 +173,7 @@ int main(void)
 	initBuffering();
 	clearBufferW();
 
-	*timer_load = speed;
+	timer_load(1, speed);
 
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
@@ -152,11 +197,11 @@ int main(void)
 		piece_draw(cur_piece, rot, x, y);
 		updateScreen();
 
-		if (*timer_value == 0)
+		if (timer_read(1) == 0)
 		{
 			if (! piece_collide(cur_piece, rot, x, y + 1, map))
 			{
-				*timer_load = speed;
+				timer_load(1, speed);
 				y++;
 			}
 			else
@@ -193,17 +238,8 @@ int main(void)
 		}
 	}
 
-	if (is_cx)
-	{
-		*timer_ctl &= ~(1 << 7);
-		*timer_ctl = timer_ctl_bkp & ~(1 << 7);
-		*timer_load = timer_load_bkp;
-		*timer_ctl = timer_ctl_bkp;
-	}
-	else
-	{
-	}
 	deinitBuffering();
+	timer_restore(1);
 	return 0;
 }
 
