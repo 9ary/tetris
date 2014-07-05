@@ -127,33 +127,33 @@ int main(void)
 	initBuffering();
 	clearBufferW();
 
+	*timer_load = 32768 * 5;
+
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
-		*timer_load = 32768;
-		while (*timer_value > 0)
+		draw_tilemap(map);
+
+		if (key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
+			rot = (rot + 1) % 4;
+
+		if (key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
+			x++;
+
+		if (key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
+			x--;
+
+		if (key_down() && ! piece_collide(cur_piece, rot, x, y + 1, map))
+			y++;
+
+		if (isKeyPressed(KEY_NSPIRE_PLUS))
+			cur_piece = (cur_piece + 1) % 7;
+
+		piece_draw(cur_piece, rot, x, y);
+		updateScreen();
+
+		if ((! piece_collide(cur_piece, rot, x, y + 1, map)) && *timer_value != 0)
 		{
-			draw_tilemap(map);
-			if (key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
-				rot = (rot + 1) % 4;
-
-			if (key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
-				x++;
-
-			if (key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
-				x--;
-
-			if (key_down() && ! piece_collide(cur_piece, rot, x, y + 1, map))
-				y++;
-
-			if (isKeyPressed(KEY_NSPIRE_PLUS))
-				cur_piece = (cur_piece + 1) % 7;
-
-			piece_draw(cur_piece, rot, x, y);
-			updateScreen();
-		}
-
-		if (! piece_collide(cur_piece, rot, x, y + 1, map))
-		{
+			*timer_load = 32768 * 5;
 			y++;
 		}
 		else
