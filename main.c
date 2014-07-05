@@ -106,7 +106,7 @@ void piece_merge(int piece, int orientation, int x, int y, uint8_t map[])
 	int i, j;
 	uint8_t tile;
 
-	for (j = 3; j >= 0; j--)
+	for (j = 0; j < 4; j++)
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
@@ -158,6 +158,7 @@ int key_down()
 
 int main(void)
 {
+	timer_init(0);
 	timer_init(1);
 
 	srand(time(NULL)); // RNG seed
@@ -165,7 +166,7 @@ int main(void)
 
 	int x = 3, y = -2;
 	int cur_piece = rand() % 7, rot = 0;
-	unsigned speed = 16384;
+	unsigned speed = 16384, key_delay = 8192;
 
 	uint8_t map[GRID_H * GRID_W];
 	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; // Map init
@@ -179,20 +180,36 @@ int main(void)
 	{
 		draw_tilemap(map);
 
-		if (key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
-			rot = (rot + 1) % 4;
+		if (key_up() || key_right() || key_left() || key_down() || isKeyPressed(KEY_NSPIRE_PLUS))
+		{
+			if (timer_read(0) == 0)
+			{
+				if (key_up() && ! piece_collide(cur_piece, (rot + 1) % 4, x, y, map))
+					rot = (rot + 1) % 4;
 
-		if (key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
-			x++;
+				if (key_right() && ! piece_collide(cur_piece, rot, x + 1, y, map))
+					x++;
 
-		if (key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
-			x--;
+				if (key_left() && ! piece_collide(cur_piece, rot, x - 1, y, map))
+					x--;
 
-		if (key_down() && ! piece_collide(cur_piece, rot, x, y + 1, map))
-			y++;
+				if (key_down() && ! piece_collide(cur_piece, rot, x, y + 1, map))
+				{
+					timer_load(1, speed);
+					y++;
+				}
 
-		if (isKeyPressed(KEY_NSPIRE_PLUS))
-			cur_piece = (cur_piece + 1) % 7;
+				if (isKeyPressed(KEY_NSPIRE_PLUS))
+					cur_piece = (cur_piece + 1) % 7;
+
+				timer_load(0, key_delay);
+				key_delay = 1024;
+			}
+		}
+		else
+		{
+			key_delay = 8192;
+		}
 
 		piece_draw(cur_piece, rot, x, y);
 		updateScreen();
@@ -201,7 +218,6 @@ int main(void)
 		{
 			if (! piece_collide(cur_piece, rot, x, y + 1, map))
 			{
-				timer_load(1, speed);
 				y++;
 			}
 			else
@@ -211,6 +227,7 @@ int main(void)
 				rot = 0;
 				cur_piece = rand() % 7;
 
+				/*
 				for (i = GRID_H - 1; i >= 0; i--)
 				{
 					int k = 0;
@@ -234,11 +251,14 @@ int main(void)
 						i++;
 					}
 				}
+				*/
 			}
+			timer_load(1, speed);
 		}
 	}
 
 	deinitBuffering();
+	timer_restore(0);
 	timer_restore(1);
 	return 0;
 }
