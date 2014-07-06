@@ -13,6 +13,8 @@
 #define TIMER 0x900D0000
 unsigned timer_ctl_bkp[2], timer_load_bkp[2];
 
+//#define DEBUG
+
 void timer_init(int timer)
 {
 	if (is_cx)
@@ -110,8 +112,13 @@ void piece_merge(int piece, int orientation, int x, int y, uint8_t map[])
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
-		if (tile > 0 && (x + i) >= 0)
+		if (tile > 0 && (x + i) >= 0 && (y + j) >= 0 && (x + i) < GRID_W && (y + j) < GRID_H)
+		{
+#ifdef DEBUG
+			printf("Merging : %u, %u\n", tile, (x + i) + (y + j) * GRID_W);
+#endif
 			map[(x + i) + (y + j) * GRID_W] = tile;
+		}
 	}
 }
 
@@ -227,7 +234,6 @@ int main(void)
 				rot = 0;
 				cur_piece = rand() % 7;
 
-				/*
 				for (i = GRID_H - 1; i >= 0; i--)
 				{
 					int k = 0;
@@ -251,7 +257,6 @@ int main(void)
 						i++;
 					}
 				}
-				*/
 			}
 			timer_load(1, speed);
 		}
