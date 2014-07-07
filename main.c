@@ -31,6 +31,14 @@ void timer_init(int timer)
 	}
 	else
 	{
+		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x0C * timer);
+		volatile unsigned *timer_divider = (unsigned *) (TIMER + 0x04 + 0x0C * timer);
+
+		timer_ctl_bkp[timer] = *timer_ctl;
+		timer_load_bkp[timer] = *timer_divider;
+
+		*timer_ctl = 0;
+		*timer_divider = 0;
 	}
 }
 
@@ -48,6 +56,11 @@ void timer_restore(int timer)
 	}
 	else
 	{
+		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x0C * timer);
+		volatile unsigned *timer_divider = (unsigned *) (TIMER + 0x04 + 0x0C * timer);
+
+		*timer_ctl = timer_ctl_bkp[timer];
+		*timer_divider = timer_load_bkp[timer];
 	}
 }
 
@@ -60,6 +73,8 @@ void timer_load(int timer, unsigned value)
 	}
 	else
 	{
+		volatile unsigned *timer_value = (unsigned *) (TIMER + 0x0C * timer);
+		*timer_value = value;
 	}
 }
 
@@ -72,7 +87,8 @@ unsigned timer_read(int timer)
 	}
 	else
 	{
-		return 0; // Dummy
+		volatile unsigned *timer_value = (unsigned *) (TIMER + 0x0C * timer);
+		return *timer_value;
 	}
 }
 
