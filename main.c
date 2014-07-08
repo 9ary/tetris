@@ -6,7 +6,7 @@
 #include "sprites.h"
 
 #define GRID_W 10
-#define GRID_H 20
+#define GRID_H 22
 #define GRID_X 10
 #define GRID_Y 105
 
@@ -97,11 +97,11 @@ void draw_tilemap(const uint8_t map[])
 	int x, y;
 	uint8_t tile;
 
-	for (y = 0; y < GRID_H; y++)
+	for (y = 2; y < GRID_H; y++)
 	for (x = 0; x < GRID_W; x++)
 	{
 		tile = map[y * GRID_W + x];
-		drawSprite(color[tile], x * 11 + GRID_Y, y * 11 + GRID_X);
+		drawSprite(color[tile], x * 11 + GRID_Y, (y - 2) * 11 + GRID_X);
 	}
 }
 
@@ -115,7 +115,7 @@ void piece_draw(int piece, int orientation, int x, int y)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
 		if (tile > 0 && (x + i) >= 0)
-			drawSprite(color[tile], (x + i) * 11 + GRID_Y, (y + j) * 11 + GRID_X);
+			drawSprite(color[tile], (x + i) * 11 + GRID_Y, (y + j - 2) * 11 + GRID_X);
 	}
 }
 
@@ -130,11 +130,14 @@ void piece_merge(int piece, int orientation, int x, int y, uint8_t map[])
 		tile = pieces[piece][orientation][i + j * 4];
 		if (tile > 0 && (x + i) >= 0 && (y + j) >= 0 && (x + i) < GRID_W && (y + j) < GRID_H)
 		{
-#ifdef DEBUG
-			printf("Merging : %u, %u\n", tile, (x + i) + (y + j) * GRID_W);
-#endif
 			map[(x + i) + (y + j) * GRID_W] = tile;
 		}
+#ifdef DEBUG
+		else if (tile > 0)
+		{
+			printf("Invalid write to map : %i, %i, %i, %i\n", tile, orientation, x + i, y + j);
+		}
+#endif
 	}
 }
 
@@ -152,7 +155,7 @@ int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
 			if (map[(x + i) + (y + j) * GRID_W])
 				return 1;
 
-			if ((x + i) < 0 || (x + i) >= GRID_W || (y + j) >= GRID_H)
+			if ((x + i) < 0 || (x + i) >= GRID_W || (y + j) < 0 || (y + j) >= GRID_H)
 				return 1;
 		}
 	}
@@ -187,7 +190,7 @@ int main(void)
 	srand(time(NULL)); // RNG seed
 	int i, j; // Loop index
 
-	int x = 3, y = -2;
+	int x = 3, y = 0;
 	int cur_piece = rand() % 7, rot = 0;
 	unsigned speed = 16384, key_delay = 8192;
 
@@ -246,9 +249,12 @@ int main(void)
 			else
 			{
 				piece_merge(cur_piece, rot, x, y, map);
-				x = 3; y = -2;
+				x = 3; y = 0;
 				rot = 0;
 				cur_piece = rand() % 7;
+#ifdef DEBUG
+				printf("Spawn : %i, %i\n", cur_piece, rot);
+#endif
 
 				for (i = GRID_H - 1; i >= 0; i--)
 				{
