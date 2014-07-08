@@ -15,7 +15,7 @@ unsigned timer_ctl_bkp[2], timer_load_bkp[2];
 
 //#define DEBUG
 
-void timer_init(int timer)
+void timer_init(unsigned timer)
 {
 	if (is_cx)
 	{
@@ -42,7 +42,7 @@ void timer_init(int timer)
 	}
 }
 
-void timer_restore(int timer)
+void timer_restore(unsigned timer)
 {
 	if (is_cx)
 	{
@@ -64,7 +64,7 @@ void timer_restore(int timer)
 	}
 }
 
-void timer_load(int timer, unsigned value)
+void timer_load(unsigned timer, unsigned value)
 {
 	if (is_cx)
 	{
@@ -78,7 +78,7 @@ void timer_load(int timer, unsigned value)
 	}
 }
 
-unsigned timer_read(int timer)
+unsigned timer_read(unsigned timer)
 {
 	if (is_cx)
 	{
@@ -92,10 +92,10 @@ unsigned timer_read(int timer)
 	}
 }
 
-void draw_tilemap(const uint8_t map[])
+void draw_tilemap(const unsigned map[])
 {
-	int x, y;
-	uint8_t tile;
+	unsigned x, y;
+	unsigned tile;
 
 	for (y = 2; y < GRID_H; y++)
 	for (x = 0; x < GRID_W; x++)
@@ -105,46 +105,46 @@ void draw_tilemap(const uint8_t map[])
 	}
 }
 
-void piece_draw(int piece, int orientation, int x, int y)
+void piece_draw(unsigned piece, unsigned orientation, unsigned x, unsigned y)
 {
-	int i, j;
-	uint8_t tile;
+	unsigned i, j;
+	unsigned tile;
 
 	for (j = 0; j < 4; j++)
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
-		if (tile > 0 && (x + i) >= 0)
+		if (tile > 0)
 			drawSprite(color[tile], (x + i) * 11 + GRID_Y, (y + j - 2) * 11 + GRID_X);
 	}
 }
 
-void piece_merge(int piece, int orientation, int x, int y, uint8_t map[])
+void piece_merge(unsigned piece, unsigned orientation, unsigned x, unsigned y, unsigned map[])
 {
-	int i, j;
-	uint8_t tile;
+	unsigned i, j;
+	unsigned tile;
 
 	for (j = 0; j < 4; j++)
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
-		if (tile > 0 && (x + i) >= 0 && (y + j) >= 0 && (x + i) < GRID_W && (y + j) < GRID_H)
+		if (tile > 0 && (x + i) < GRID_W && (y + j) < GRID_H)
 		{
 			map[(x + i) + (y + j) * GRID_W] = tile;
 		}
 #ifdef DEBUG
 		else if (tile > 0)
 		{
-			printf("Invalid write to map : %i, %i, %i, %i\n", tile, orientation, x + i, y + j);
+			printf("Invalid write to map : %u, %u, %u, %u\n", tile, orientation, x + i, y + j);
 		}
 #endif
 	}
 }
 
-int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
+unsigned piece_collide(unsigned piece, unsigned orientation, unsigned x, unsigned y, unsigned map[])
 {
-	int i, j;
-	uint8_t tile;
+	unsigned i, j;
+	unsigned tile;
 
 	for (j = 0; j < 4; j++)
 	for (i = 0; i < 4; i++)
@@ -155,29 +155,29 @@ int piece_collide(int piece, int orientation, int x, int y, uint8_t map[])
 			if (map[(x + i) + (y + j) * GRID_W])
 				return 1;
 
-			if ((x + i) < 0 || (x + i) >= GRID_W || (y + j) < 0 || (y + j) >= GRID_H)
+			if ((x + i) >= GRID_W || (y + j) >= GRID_H)
 				return 1;
 		}
 	}
 	return 0;
 }
 
-int key_left()
+unsigned key_left()
 {
 	return isKeyPressed(KEY_NSPIRE_LEFT) || isKeyPressed(KEY_NSPIRE_4);
 }
 
-int key_right()
+unsigned key_right()
 {
 	return isKeyPressed(KEY_NSPIRE_RIGHT) || isKeyPressed(KEY_NSPIRE_6);
 }
 
-int key_up()
+unsigned key_up()
 {
 	return isKeyPressed(KEY_NSPIRE_UP) || isKeyPressed(KEY_NSPIRE_8);
 }
 
-int key_down()
+unsigned key_down()
 {
 	return isKeyPressed(KEY_NSPIRE_DOWN) || isKeyPressed(KEY_NSPIRE_5) || isKeyPressed(KEY_NSPIRE_2);
 }
@@ -188,13 +188,13 @@ int main(void)
 	timer_init(1);
 
 	srand(time(NULL)); // RNG seed
-	int i, j; // Loop index
+	unsigned i, j; // Loop index
 
-	int x = 3, y = 0;
-	int cur_piece = rand() % 7, rot = 0;
+	unsigned x = 3, y = 0;
+	unsigned cur_piece = rand() % 7, rot = 0;
 	unsigned speed = 16384, key_delay = 8192;
 
-	uint8_t map[GRID_H * GRID_W];
+	unsigned map[GRID_H * GRID_W];
 	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; // Map init
 
 	initBuffering();
@@ -253,12 +253,12 @@ int main(void)
 				rot = 0;
 				cur_piece = rand() % 7;
 #ifdef DEBUG
-				printf("Spawn : %i, %i\n", cur_piece, rot);
+				printf("Spawn : %u, %u\n", cur_piece, rot);
 #endif
 
-				for (i = GRID_H - 1; i >= 0; i--)
+				for (i = GRID_H - 1; i < GRID_H; i--)
 				{
-					int k = 0;
+					unsigned k = 0;
 					for (j = 0; j < GRID_W; j++)
 					{
 						if (map[j + i * GRID_W] > 0)

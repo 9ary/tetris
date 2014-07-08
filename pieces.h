@@ -1,4 +1,4 @@
-const uint8_t pieces[][4][16] =
+const unsigned pieces[][4][16] =
 {
 	{ // |
 		{
