@@ -6,9 +6,10 @@
 #include "sprites.h"
 
 #define GRID_W 10
-#define GRID_H 22
+#define GRID_H 23
 #define GRID_X 10
 #define GRID_Y 105
+#define GRID_SPAWN 3
 
 #define TIMER 0x900D0000
 unsigned timer_ctl_bkp[2], timer_load_bkp[2];
@@ -97,11 +98,11 @@ void draw_tilemap(const unsigned map[])
 	unsigned x, y;
 	unsigned tile;
 
-	for (y = 2; y < GRID_H; y++)
+	for (y = GRID_SPAWN; y < GRID_H; y++)
 	for (x = 0; x < GRID_W; x++)
 	{
 		tile = map[y * GRID_W + x];
-		drawSprite(color[tile], x * 11 + GRID_Y, (y - 2) * 11 + GRID_X);
+		drawSprite(color[tile], x * 11 + GRID_Y, (y - GRID_SPAWN) * 11 + GRID_X);
 	}
 }
 
@@ -115,7 +116,7 @@ void piece_draw(unsigned piece, unsigned orientation, unsigned x, unsigned y)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
 		if (tile > 0)
-			drawSprite(color[tile], (x + i) * 11 + GRID_Y, (y + j - 2) * 11 + GRID_X);
+			drawSprite(color[tile], (x + i) * 11 + GRID_Y, (y + j - GRID_SPAWN) * 11 + GRID_X);
 	}
 }
 
