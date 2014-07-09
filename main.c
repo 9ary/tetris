@@ -119,18 +119,20 @@ void piece_draw(unsigned piece, unsigned orientation, unsigned x, unsigned y)
 	}
 }
 
-void piece_merge(unsigned piece, unsigned orientation, unsigned x, unsigned y, unsigned map[])
+unsigned piece_merge(unsigned piece, unsigned orientation, unsigned x, unsigned y, unsigned map[])
 {
 	unsigned i, j;
 	unsigned tile;
 
-	for (j = 0; j < 4; j++)
+	for (j = 3; j < 4; j--)
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
 		if (tile > 0 && (x + i) < GRID_W && (y + j) < GRID_H)
 		{
 			map[(x + i) + (y + j) * GRID_W] = tile;
+			if ((y + j) < 2)
+				return 1;
 		}
 #ifdef DEBUG
 		else if (tile > 0)
@@ -139,6 +141,7 @@ void piece_merge(unsigned piece, unsigned orientation, unsigned x, unsigned y, u
 		}
 #endif
 	}
+	return 0;
 }
 
 unsigned piece_collide(unsigned piece, unsigned orientation, unsigned x, unsigned y, unsigned map[])
@@ -248,7 +251,16 @@ int main(void)
 			}
 			else
 			{
-				piece_merge(cur_piece, rot, x, y, map);
+				if (piece_merge(cur_piece, rot, x, y, map)) // THE GAME
+				{
+#ifdef DEBUG
+					printf("THE GAME\n");
+#endif
+					deinitBuffering();
+					timer_restore(0);
+					timer_restore(1);
+					return 0;
+				}
 				x = 3; y = 0;
 				rot = 0;
 				cur_piece = rand() % 7;
