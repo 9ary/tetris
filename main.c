@@ -239,6 +239,7 @@ int main(void)
 		else
 		{
 			key_delay = 8192;
+			timer_load(0, 0);
 		}
 
 		piece_draw(cur_piece, rot, x, y);
