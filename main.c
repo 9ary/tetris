@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include "n2DLib.h"
-#include "pieces.h"
-#include "sprites.h"
+#include "pieces.c"
+#include "sprites.c"
 
 #define GRID_W 10
 #define GRID_H 23
