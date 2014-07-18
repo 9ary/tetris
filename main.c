@@ -7,8 +7,8 @@
 
 #define GRID_W 10
 #define GRID_H 23
-#define GRID_X 10
-#define GRID_Y 105
+#define GRID_Y 10
+#define GRID_X 105
 #define GRID_SPAWN 3
 
 #define TIMER 0x900D0000
@@ -102,7 +102,7 @@ void draw_tilemap(const unsigned map[])
 	for (x = 0; x < GRID_W; x++)
 	{
 		tile = map[y * GRID_W + x];
-		drawSprite(color[tile], x * 11 + GRID_Y, (y - GRID_SPAWN) * 11 + GRID_X);
+		drawSprite(color[tile], x * 11 + GRID_X, (y - GRID_SPAWN) * 11 + GRID_Y);
 	}
 }
 
@@ -116,7 +116,7 @@ void piece_draw(unsigned piece, unsigned orientation, unsigned x, unsigned y)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
 		if (tile > 0)
-			drawSprite(color[tile], (x + i) * 11 + GRID_Y, (y + j - GRID_SPAWN) * 11 + GRID_X);
+			drawSprite(color[tile], (x + i) * 11 + GRID_X, (y + j - GRID_SPAWN) * 11 + GRID_Y);
 	}
 }
 
