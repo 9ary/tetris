@@ -115,7 +115,7 @@ void piece_draw(unsigned piece, unsigned orientation, unsigned x, unsigned y)
 	for (i = 0; i < 4; i++)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
-		if (tile > 0)
+		if (tile > 0 && (y + j) >= GRID_SPAWN)
 			drawSprite(color[tile], (x + i) * 11 + GRID_X, (y + j - GRID_SPAWN) * 11 + GRID_Y);
 	}
 }
