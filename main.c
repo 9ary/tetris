@@ -13,85 +13,11 @@
 
 #define TIMER 0x900D0000
 unsigned timer_ctl_bkp[2], timer_load_bkp[2];
+int bag[7];
+int in_bag = 0;
 
 //#define DEBUG
 
-void timer_init(unsigned timer)
-{
-	if (is_cx)
-	{
-		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x20 * timer);
-		volatile unsigned *timer_load = (unsigned *) (TIMER + 0x20 * timer);
-
-		timer_ctl_bkp[timer] = *timer_ctl;
-		timer_load_bkp[timer] = *timer_load;
-
-		*timer_ctl &= ~(1 << 7);
-		*timer_ctl = 0b01100011;
-		*timer_ctl |= (1 << 7);
-	}
-	else
-	{
-		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x0C * timer);
-		volatile unsigned *timer_divider = (unsigned *) (TIMER + 0x04 + 0x0C * timer);
-
-		timer_ctl_bkp[timer] = *timer_ctl;
-		timer_load_bkp[timer] = *timer_divider;
-
-		*timer_ctl = 0;
-		*timer_divider = 0;
-	}
-}
-
-void timer_restore(unsigned timer)
-{
-	if (is_cx)
-	{
-		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x20 * timer);
-		volatile unsigned *timer_load = (unsigned *) (TIMER + 0x20 * timer);
-
-		*timer_ctl &= ~(1 << 7);
-		*timer_ctl = timer_ctl_bkp[timer] & ~(1 << 7);
-		*timer_load = timer_load_bkp[timer];
-		*timer_ctl = timer_ctl_bkp[timer];
-	}
-	else
-	{
-		volatile unsigned *timer_ctl = (unsigned *) (TIMER + 0x08 + 0x0C * timer);
-		volatile unsigned *timer_divider = (unsigned *) (TIMER + 0x04 + 0x0C * timer);
-
-		*timer_ctl = timer_ctl_bkp[timer];
-		*timer_divider = timer_load_bkp[timer];
-	}
-}
-
-void timer_load(unsigned timer, unsigned value)
-{
-	if (is_cx)
-	{
-		volatile unsigned *timer_load = (unsigned *) (TIMER + 0x20 * timer);
-		*timer_load = value;
-	}
-	else
-	{
-		volatile unsigned *timer_value = (unsigned *) (TIMER + 0x0C * timer);
-		*timer_value = value;
-	}
-}
-
-unsigned timer_read(unsigned timer)
-{
-	if (is_cx)
-	{
-		volatile unsigned *timer_value = (unsigned *) (TIMER + 0x04 + 0x20 * timer);
-		return *timer_value;
-	}
-	else
-	{
-		volatile unsigned *timer_value = (unsigned *) (TIMER + 0x0C * timer);
-		return *timer_value;
-	}
-}
 
 void draw_tilemap(const unsigned map[])
 {
@@ -102,7 +28,7 @@ void draw_tilemap(const unsigned map[])
 	for (x = 0; x < GRID_W; x++)
 	{
 		tile = map[y * GRID_W + x];
-		drawSprite(color[tile], x * 11 + GRID_X, (y - GRID_SPAWN) * 11 + GRID_Y);
+		drawSprite(color[tile], (y - GRID_SPAWN) * 11 ,240- x * 11 );
 	}
 }
 
@@ -116,8 +42,8 @@ void piece_draw(unsigned piece, unsigned orientation, unsigned x, unsigned y)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
 		if (tile > 0 && (y + j) >= GRID_SPAWN)
-			drawSprite(color[tile], (x + i) * 11 + GRID_X, (y + j - GRID_SPAWN) * 11 + GRID_Y);
-	}
+			drawSprite(color[tile], (y + j - GRID_SPAWN) * 11 , 240 - (x + i) * 11 );
+	}	
 }
 
 unsigned piece_merge(unsigned piece, unsigned orientation, unsigned x, unsigned y, unsigned map[])
@@ -186,6 +112,40 @@ unsigned key_down()
 	return isKeyPressed(KEY_NSPIRE_DOWN) || isKeyPressed(KEY_NSPIRE_5) || isKeyPressed(KEY_NSPIRE_2);
 }
 
+//bag algorithm
+//I have no idea whatI'm doing and I'll probably break everything
+int bag_piece()
+{
+	int i;
+	if ( in_bag > 0 )
+	{
+		in_bag--;
+		i = bag[in_bag];
+		bag[in_bag] = -1;
+		return i;
+	}
+	while( in_bag < 7 )
+	{
+		i = rand()%7;
+		int z = 0;
+		int j;
+		for( j = 0; j < 7; j++)
+		{
+			if( i == bag[j] ) z++;
+		}
+		if( z == 0 )
+		{
+			bag[in_bag] = i;
+			in_bag++;
+		}
+		
+	}
+	bag[--in_bag] = -1;
+	return i;
+}
+	
+
+
 int main(void)
 {
 	timer_init(0);
@@ -195,6 +155,7 @@ int main(void)
 	unsigned i, j; // Loop index
 
 	unsigned x = 3, y = 0;
+	//int txtx = 0, txty = 0;// text displaying ints
 	unsigned cur_piece = rand() % 7, rot = 0;
 	unsigned speed = 16384, key_delay = 8192;
 
@@ -209,6 +170,7 @@ int main(void)
 	while (! isKeyPressed(KEY_NSPIRE_ESC))
 	{
 		draw_tilemap(map);
+		
 
 		if (key_up() || key_right() || key_left() || key_down() || isKeyPressed(KEY_NSPIRE_PLUS))
 		{
@@ -243,6 +205,9 @@ int main(void)
 		}
 
 		piece_draw(cur_piece, rot, x, y);
+		//txtx = 10;
+		//txty = 10;
+		//drawDecimal(&txtx, &txty, 240 - ( (x ) * 11) + GRID_Y,0,65335);
 		updateScreen();
 
 		if (timer_read(1) == 0)
@@ -265,7 +230,7 @@ int main(void)
 				}
 				x = 3; y = 0;
 				rot = 0;
-				cur_piece = rand() % 7;
+				cur_piece = bag_piece();
 #ifdef DEBUG
 				printf("Spawn : %u, %u\n", cur_piece, rot);
 #endif
