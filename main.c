@@ -13,8 +13,7 @@
 
 #define TIMER 0x900D0000
 unsigned timer_ctl_bkp[2], timer_load_bkp[2];
-int bag[7];
-int in_bag = 0;
+
 
 //#define DEBUG
 
@@ -28,7 +27,7 @@ void draw_tilemap(const unsigned map[])
 	for (x = 0; x < GRID_W; x++)
 	{
 		tile = map[y * GRID_W + x];
-		drawSprite(color[tile], (y - GRID_SPAWN) * 11 ,240- x * 11 );
+		drawSprite(color[tile],  x * 11 ,(y - GRID_SPAWN) * 11 );
 	}
 }
 
@@ -42,7 +41,7 @@ void piece_draw(unsigned piece, unsigned orientation, unsigned x, unsigned y)
 	{
 		tile = pieces[piece][orientation][i + j * 4];
 		if (tile > 0 && (y + j) >= GRID_SPAWN)
-			drawSprite(color[tile], (y + j - GRID_SPAWN) * 11 , 240 - (x + i) * 11 );
+			drawSprite(color[tile],  (x + i) * 11, (y + j - GRID_SPAWN) * 11  );
 	}	
 }
 
@@ -112,35 +111,28 @@ unsigned key_down()
 	return isKeyPressed(KEY_NSPIRE_DOWN) || isKeyPressed(KEY_NSPIRE_5) || isKeyPressed(KEY_NSPIRE_2);
 }
 
-//bag algorithm
-//I have no idea whatI'm doing and I'll probably break everything
-int bag_piece()
+
+int bag_piece( int bag[7], int *bag_cnt )
 {
-	int i;
-	if ( in_bag > 0 )
+	
+	int i, z = 1;
+	if(*bag_cnt == 0)
 	{
-		in_bag--;
-		i = bag[in_bag];
-		bag[in_bag] = -1;
-		return i;
+		for(i = 0; i < 7; i++)
+		 bag[i] = i;
+		*bag_cnt = 7;
 	}
-	while( in_bag < 7 )
+	
+	do
 	{
-		i = rand()%7;
-		int z = 0;
-		int j;
-		for( j = 0; j < 7; j++)
+		i = rand() % 7;
+		if(bag[i] != -1)
 		{
-			if( i == bag[j] ) z++;
-		}
-		if( z == 0 )
-		{
-			bag[in_bag] = i;
-			in_bag++;
-		}
-		
-	}
-	bag[--in_bag] = -1;
+			bag[i] = -1;
+			z = 0;
+		} 
+	} while(z) ;
+	*bag_cnt = *bag_cnt - 1;
 	return i;
 }
 	
@@ -155,8 +147,10 @@ int main(void)
 	unsigned i, j; // Loop index
 
 	unsigned x = 3, y = 0;
-	//int txtx = 0, txty = 0;// text displaying ints
-	unsigned cur_piece = rand() % 7, rot = 0;
+	int txtx = 0, txty = 0;// text displaying ints
+	int bag[7];
+	int bag_cnt = 0;
+	unsigned cur_piece = bag_piece( bag, &bag_cnt ), rot = 0;
 	unsigned speed = 16384, key_delay = 8192;
 
 	unsigned map[GRID_H * GRID_W];
@@ -192,7 +186,7 @@ int main(void)
 				}
 
 				if (isKeyPressed(KEY_NSPIRE_PLUS))
-					cur_piece = (cur_piece + 1) % 7;
+					cur_piece = bag_piece( bag, &bag_cnt);
 
 				timer_load(0, key_delay);
 				key_delay = 1024;
@@ -205,9 +199,9 @@ int main(void)
 		}
 
 		piece_draw(cur_piece, rot, x, y);
-		//txtx = 10;
-		//txty = 10;
-		//drawDecimal(&txtx, &txty, 240 - ( (x ) * 11) + GRID_Y,0,65335);
+		txtx = 10;
+		txty = 10;
+		drawDecimal(&txtx, &txty, bag_cnt,0,65335);
 		updateScreen();
 
 		if (timer_read(1) == 0)
@@ -230,7 +224,7 @@ int main(void)
 				}
 				x = 3; y = 0;
 				rot = 0;
-				cur_piece = bag_piece();
+				cur_piece = bag_piece( bag, &bag_cnt);
 #ifdef DEBUG
 				printf("Spawn : %u, %u\n", cur_piece, rot);
 #endif
