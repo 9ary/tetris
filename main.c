@@ -147,6 +147,12 @@ int main(void)
 	unsigned i, j; // Loop index
 
 	unsigned x = 3, y = 0;
+
+	int cleared_lines, turn_score, clearing_value;
+	int score = 0, multiplier = 10, current_level = 1;
+
+	int base_score = 2;
+	
 	int txtx = 0, txty = 0;// text displaying ints
 	int bag[7];
 	int bag_cnt = 0;
@@ -165,6 +171,11 @@ int main(void)
 	{
 		draw_tilemap(map);
 		
+		//reset turn score to zero
+		turn_score = 0;	
+
+
+
 
 		if (key_up() || key_right() || key_left() || key_down() || isKeyPressed(KEY_NSPIRE_PLUS))
 		{
@@ -199,9 +210,14 @@ int main(void)
 		}
 
 		piece_draw(cur_piece, rot, x, y);
-		txtx = 10;
+		//debug values
+		txtx = 150;
 		txty = 10;
-		drawDecimal(&txtx, &txty, bag_cnt,0,65335);
+		drawDecimal(&txtx, &txty, (score / 10) ,0,65335);
+		//txty = 20;
+		//drawDecimal(&txtx, &txty, multiplier
+
+		//
 		updateScreen();
 
 		if (timer_read(1) == 0)
@@ -212,7 +228,7 @@ int main(void)
 			}
 			else
 			{
-				if (piece_merge(cur_piece, rot, x, y, map)) // THE GAME
+				if (piece_merge(cur_piece, rot, x, y, map)) //Game over
 				{
 #ifdef DEBUG
 					printf("THE GAME\n");
@@ -224,21 +240,26 @@ int main(void)
 				}
 				x = 3; y = 0;
 				rot = 0;
-				cur_piece = bag_piece( bag, &bag_cnt);
+				cur_piece = bag_piece( bag, &bag_cnt); //get a new piece from the bag
 #ifdef DEBUG
 				printf("Spawn : %u, %u\n", cur_piece, rot);
 #endif
 
-				for (i = GRID_H - 1; i < GRID_H; i--)
+				cleared_lines = 0;  //set line counter to zero
+				clearing_value = 0; //set clearing value to zero
+				for (i = GRID_H - 1; i < GRID_H; i--) //loop over grid height
 				{
 					unsigned k = 0;
-					for (j = 0; j < GRID_W; j++)
+					for (j = 0; j < GRID_W; j++)  //loop over grid width
 					{
 						if (map[j + i * GRID_W] > 0)
 							k++;
 					}
-					if (k == GRID_W)
+					
+					if (k == GRID_W)  //SCORE!!!!!1!!
 					{
+						cleared_lines++;
+						clearing_value = clearing_value + cleared_lines;
 						for (j = 0; j < GRID_W; j++)
 							map[j + i * GRID_W] = 0;
 
@@ -252,6 +273,20 @@ int main(void)
 						i++;
 					}
 				}
+				turn_score = turn_score + (clearing_value * base_score);
+
+				if(cleared_lines){ //check if combos are made, add moar scoar!
+					base_score = base_score + (((current_level - 1)/3)+1);
+					if(cleared_lines == 4) multiplier = multiplier + 2;
+					//if(grid_clear) multiplier = multiplier + 5;  have not yet implemented the check for this
+				}
+				else
+				{
+					base_score = current_level * 2;
+				}
+				score = score + (multiplier * turn_score);
+
+				
 			}
 			timer_load(1, speed);
 		}
