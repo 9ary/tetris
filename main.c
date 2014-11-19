@@ -150,6 +150,7 @@ int main(void)
 
 	int cleared_lines, turn_score, clearing_value;
 	int score = 0, multiplier = 10, current_level = 1;
+	int pause = -1;
 
 	int base_score = 2;
 	
@@ -172,11 +173,19 @@ int main(void)
 		draw_tilemap(map);
 		
 		//reset turn score to zero
-		turn_score = 0;	
-
-
-
-
+		
+		if (isKeyPressed(KEY_NSPIRE_VAR))
+		{
+			pause = pause*-1;
+			if(pause == 1)
+				i = timer_read(1);
+			while(isKeyPressed(KEY_NSPIRE_VAR))
+			if(pause == -1)
+				timer_load(1,i);
+		}
+		if (pause == 1)
+			continue;
+		
 		if (key_up() || key_right() || key_left() || key_down() || isKeyPressed(KEY_NSPIRE_PLUS))
 		{
 			if (timer_read(0) == 0)
@@ -214,8 +223,12 @@ int main(void)
 		txtx = 150;
 		txty = 10;
 		drawDecimal(&txtx, &txty, (score / 10) ,0,65335);
-		//txty = 20;
-		//drawDecimal(&txtx, &txty, multiplier
+		txtx = 150;
+		txty = 20;
+		drawDecimal(&txtx, &txty, score, 0,65335);
+		txtx = 150;
+		txty = 30;
+		drawDecimal(&txtx, &txty, multiplier, 0, 65335);
 
 		//
 		updateScreen();
