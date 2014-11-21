@@ -136,32 +136,50 @@ int bag_piece( int bag[7], int *bag_cnt )
 	return i;
 }
 	
-
-
+void draw_debug(int s, int m)
+{
+	int txtx = 0, txty = 0;// text displaying ints
+	txtx = 150;
+	txty = 10;
+	drawDecimal(&txtx, &txty, (s / 10) ,0,65335);
+	txtx = 150;
+	txty = 20;
+	drawDecimal(&txtx, &txty, s, 0,65335);
+	txtx = 150;
+	txty = 30;
+	drawDecimal(&txtx, &txty, m, 0, 65335);
+}
 int main(void)
 {
-	timer_init(0);
-	timer_init(1);
+	timer_init(0);//initialize timer #0
+	timer_init(1);//initialize timer #1
+//initialize ALL the things vvv
+
 
 	srand(time(NULL)); // RNG seed
-	unsigned i, j; // Loop index
+	unsigned i, j; // Loop indices, also can be used for free outside loops
 
-	unsigned x = 3, y = 0;
+	unsigned x = 3, y = 0; //set initial x and y values for piece
 
-	int cleared_lines, turn_score, clearing_value;
-	int score = 0, multiplier = 10, current_level = 1;
-	int pause = -1;
+	int cleared_lines, turn_score, clearing_value;  //initialize scoring parameters
+	int score = 0, multiplier = 10, current_level = 1; //same
+	int pause = -1; //game is not paused on start
 
-	int base_score = 2;
+	int base_score = 2; //
 	
-	int txtx = 0, txty = 0;// text displaying ints
-	int bag[7];
-	int bag_cnt = 0;
-	unsigned cur_piece = bag_piece( bag, &bag_cnt ), rot = 0;
-	unsigned speed = 16384, key_delay = 8192;
+	
+	int bag[7]; //bag can hold 7 pieces
+	int bag_cnt = 0; //bag is set to empty state at load
 
-	unsigned map[GRID_H * GRID_W];
-	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; // Map init
+	unsigned cur_piece = bag_piece( bag, &bag_cnt ), rot = 0;  //initialize first piece. Must change this so it chooses from L/J
+
+	unsigned speed = 16384, key_delay = 8192; //
+
+
+
+	unsigned map[GRID_H * GRID_W];	
+	for (i = 0; i < GRID_H * GRID_W; i++) map[i] = 0; // Map init. Might be able to replace this with a memset( ??
+	
 
 	initBuffering();
 	clearBufferW();
@@ -220,17 +238,7 @@ int main(void)
 		}
 
 		piece_draw(cur_piece, rot, x, y);
-		//debug values
-		txtx = 150;
-		txty = 10;
-		drawDecimal(&txtx, &txty, (score / 10) ,0,65335);
-		txtx = 150;
-		txty = 20;
-		drawDecimal(&txtx, &txty, score, 0,65335);
-		txtx = 150;
-		txty = 30;
-		drawDecimal(&txtx, &txty, multiplier, 0, 65335);
-
+		draw_debug(score, multiplier);
 		//
 		updateScreen();
 
