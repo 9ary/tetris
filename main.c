@@ -173,6 +173,7 @@ int main(void)
 		draw_tilemap(map);
 		
 		//reset turn score to zero
+		turn_score = 0;
 		
 		if (isKeyPressed(KEY_NSPIRE_VAR))
 		{
